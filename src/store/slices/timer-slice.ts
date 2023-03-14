@@ -1,40 +1,62 @@
 import Slice from "../../interfaces/Slice";
 import State from "../../interfaces/State";
-import TimerSettings from "../../interfaces/TimerSettings";
 
 const timerSlice: Slice<State> = {
 	name: "timer",
 	initialState: {
-		time: {
+		clock: {
 			minutes: 0,
 			seconds: 0,
 		},
-		startTime: 0,
-		duration: 0,
-		isCountingUp: false,
-		isTimerRunning: false,
+		settings: {
+			startTime: 0,
+			duration: 0,
+			isCountingUp: false,
+			isTimerRunning: false,
+		},
 	},
 	reducers: {
-		setTime(state, action) {
+		setClock(state, action) {
 			return {
 				...state,
-				time: {
+				clock: {
 					...state.time,
 					minutes: action.payload.minutes,
 					seconds: action.payload.seconds,
 				},
 			};
 		},
+		setStartTime(state, action) {
+			return {
+				...state,
+				settings: {
+					...state.settings,
+					startTime: action.payload,
+				},
+			};
+		},
 		setDuration(state, action) {
 			return {
 				...state,
-				duration: action.payload,
+				settings: {
+					...state.settings,
+					duration: action.payload,
+				},
 			};
 		},
 		setIsCountingUp(state, action) {
 			return {
 				...state,
-				isCountingUp: action.payload,
+				settings: {
+					...state.settings,
+					IsCountingUp: action.payload,
+				},
+			};
+		},
+		setSettings(state, action) {
+			return {
+				...state,
+				settings: action.payload,
 			};
 		},
 	},
