@@ -16,10 +16,6 @@ export default class Store {
 		return this.state;
 	}
 
-	static getSliceState(sliceName: string): State {
-		return this.state[sliceName];
-	}
-
 	static dispatch(type: string, payload?: any): void {
 		this.state = this.rootReducer(this.state, { type, payload });
 		this.persistState();

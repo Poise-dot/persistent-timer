@@ -12,7 +12,7 @@ const timerSlice: Slice<State> = {
 			startTime: 0,
 			duration: 0,
 			isCountingUp: false,
-			isTimerRunning: false,
+			isRunning: false,
 		},
 	},
 	reducers: {
