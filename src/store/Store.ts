@@ -1,7 +1,6 @@
 import Slice from "../interfaces/Slice";
 import State from "../interfaces/State";
 import { Reducer } from "../interfaces/Types";
-import Database from "../services/Database";
 
 export default class Store {
 	private static state: State = {};
@@ -23,6 +22,7 @@ export default class Store {
 
 	static dispatch(type: string, payload?: any): void {
 		this.state = this.rootReducer(this.state, { type, payload });
+		this.persistState();
 		this.notifyListeners();
 	}
 
@@ -37,12 +37,24 @@ export default class Store {
 		slices: Slice<any>[]
 	): Record<string, Reducer<any>> {
 		const reducers: Record<string, Reducer<any>> = {};
-		slices.forEach((slice) => {
-			this.state[slice.name] = slice.initialState;
-			Object.values(slice.reducers).forEach((r) => {
-				reducers[`${slice.name}/${r.name}`] = r;
+		const state: State | null = this.loadState();
+
+		if (!state) {
+			slices.forEach((slice) => {
+				this.state[slice.name] = slice.initialState;
+				Object.values(slice.reducers).forEach((r) => {
+					reducers[`${slice.name}/${r.name}`] = r;
+				});
 			});
-		});
+		} else {
+			this.state = state;
+
+			slices.forEach((slice) => {
+				Object.values(slice.reducers).forEach((r) => {
+					reducers[`${slice.name}/${r.name}`] = r;
+				});
+			});
+		}
 
 		return reducers;
 	}
@@ -58,6 +70,19 @@ export default class Store {
 		};
 
 		return rootReducer;
+	}
+	private static persistState(): void {
+		const serializedState = JSON.stringify(this.state);
+		localStorage.setItem("state", serializedState);
+	}
+	private static loadState(): State | null {
+		const serializedState = localStorage.getItem("state");
+
+		if (!serializedState) {
+			return null;
+		} else {
+			return JSON.parse(serializedState) as State;
+		}
 	}
 	private static notifyListeners(): void {
 		this.listeners.forEach((l) => {
