@@ -12,7 +12,6 @@ class Program {
 
 		const timer = new Timer();
 
-		app.append(document.createTextNode("Test"));
 		app.append(timer.elements.root);
 		document.getElementById("app")?.appendChild(app);
 	}
