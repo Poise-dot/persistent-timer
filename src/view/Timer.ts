@@ -13,7 +13,11 @@ export default class Timer {
 			this.setClock(minutes, seconds);
 		});
 
-		if (Store.getState().timer.settings.isRunning) {
+		const { isRunning, isCountingUp } = Store.getState().timer.settings;
+		if (isRunning) {
+			Store.dispatch("timer/computeClockCount");
+			const { minutes, seconds } = Store.getState().timer.clock;
+			this.setClock(minutes, seconds);
 			this.count();
 		}
 	}
@@ -93,7 +97,7 @@ export default class Timer {
 		this.elements.select.addEventListener("change", (e: Event) => {
 			Store.dispatch(
 				"timer/setIsCountingUp",
-				(e.currentTarget as Select).value
+				(e.currentTarget as Select).value === "true" ? true : false
 			);
 		});
 
@@ -102,58 +106,32 @@ export default class Timer {
 		});
 	}
 	private count() {
-		const { settings } = Store.getState().timer;
-		const duration: number = settings.duration;
-		const isCountingUp: boolean = settings.isCountingUp;
-		let startTime: number = settings.startTime;
+		const { startTime, duration, isCountingUp } =
+			Store.getState().timer.settings;
 
 		if (!startTime) {
-			startTime = Date.now();
+			console.log("test");
+			Store.dispatch("timer/setStartTime", Date.now());
 		}
 
-		const id = setInterval(() => {
-			const currentTime: number = Date.now();
-			const elapsedTime: number = currentTime - <number>startTime;
+		Store.dispatch("timer/startCount");
 
-			let minutes;
-			let seconds;
+		const interval = setInterval(() => {
+			const currentTime: number = Date.now();
+			const elapsedTime: number =
+				currentTime - Store.getState().timer.settings.startTime;
 
 			if (elapsedTime >= duration) {
-				clearInterval(id);
-
-				minutes = 0;
-				seconds = 0;
-
-				Store.dispatch("timer/setSettings", {
-					startTime: 0,
-					duration,
-					isCountingUp,
-					isRunning: false,
-				});
+				clearInterval(interval);
+				Store.dispatch("timer/resetClock");
+				Store.dispatch("timer/resetCount");
 			} else {
-				const remainingTime: number = duration - elapsedTime;
-
-				minutes = Math.floor(
-					(remainingTime % (1000 * 60 * 60)) / (1000 * 60)
-				);
-				seconds = Math.ceil((remainingTime % (1000 * 60)) / 1000);
-
-				if (seconds === 60) {
-					minutes -= 1;
-					minutes = minutes < 1 ? 0 : minutes;
-					seconds = 0;
-				}
-
-				console.log(remainingTime, minutes, seconds);
-				Store.dispatch("timer/setSettings", {
-					startTime,
-					duration,
-					isCountingUp,
-					isRunning: true,
-				});
+				Store.dispatch("timer/computeClockCount");
 			}
 
-			Store.dispatch("timer/setClock", { minutes, seconds });
+			console.log(Store.getState().timer.clock);
 		}, 1000);
 	}
+
+	private resumeCountIfOngoing() {}
 }
