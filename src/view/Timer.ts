@@ -13,13 +13,7 @@ export default class Timer {
 			this.setClock(minutes, seconds);
 		});
 
-		const { isRunning, isCountingUp } = Store.getState().timer.settings;
-		if (isRunning) {
-			Store.dispatch("timer/computeClockCount");
-			const { minutes, seconds } = Store.getState().timer.clock;
-			this.setClock(minutes, seconds);
-			this.count();
-		}
+		this.resumeCountIfOngoing();
 	}
 
 	private createElements() {
@@ -133,5 +127,13 @@ export default class Timer {
 		}, 1000);
 	}
 
-	private resumeCountIfOngoing() {}
+	private resumeCountIfOngoing() {
+		const { isRunning } = Store.getState().timer.settings;
+		if (isRunning) {
+			Store.dispatch("timer/computeClockCount");
+			const { minutes, seconds } = Store.getState().timer.clock;
+			this.setClock(minutes, seconds);
+			this.count();
+		}
+	}
 }
