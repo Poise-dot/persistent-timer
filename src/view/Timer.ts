@@ -3,6 +3,7 @@ import Store from "../store/Store";
 
 export default class Timer {
 	public elements;
+	private interval: any = 0;
 
 	constructor() {
 		this.elements = this.createElements();
@@ -21,9 +22,11 @@ export default class Timer {
 		timer.className = "timer";
 		timer.innerHTML = `
 		<div class="timer-clock">
+			Minutes:
 			<div class="clock-minutes">
-				${Store.getState().timer.clock.minutes}
+			 	${Store.getState().timer.clock.minutes}
 			</div>
+			Seconds:
 			<div class="clock-seconds">
 				${Store.getState().timer.clock.seconds}
 			</div>
@@ -31,12 +34,11 @@ export default class Timer {
 		<div class="timer-inputs">
 			<label> Duration:
 				<input
-					class="timer-input"
+					class="timer-input-duration"
 					type="number"
 					value="0"
 					min="0"
-					max="60"
-					title="miliseconds"
+					title="duration in miliseconds"
 				/>
 			</label>
 			<select class="timer-select-isCountingUp" title="Count up or down?">
@@ -44,34 +46,39 @@ export default class Timer {
 				<option value="true">Up</option>
 			</select>
 			<button class="timer-start-btn" type="button">Start</button>
+			<button class="timer-stop-btn" type="button">STOP</button>
 		</div>
 		`;
 
-		/* <input
-					class="timer-minutes-input"
-					type="time"
+		/* 
+			<label> Duration:
+				<input
+					class="timer-input-mins"
+					type="number"
 					value="0"
 					min="0"
 					max="60"
 					title="minutes"
 				/>
 				<input
-					class="timer-seconds-input"
+					class="timer-input-secs"
 					type="number"
 					value="0"
 					min="0"
 					max="59"
 					title="seconds"
 				/>
+			</label>
 		*/
 
 		const elements = {
 			root: timer,
 			minutes: timer.querySelector(".clock-minutes") as Div,
 			seconds: timer.querySelector(".clock-seconds") as Div,
-			input: timer.querySelector(".timer-input") as Input,
+			input: timer.querySelector(".timer-input-duration") as Input,
 			select: timer.querySelector(".timer-select-isCountingUp") as Select,
 			btnStart: timer.querySelector(".timer-start-btn") as Button,
+			btnStop: timer.querySelector(".timer-stop-btn") as Button,
 		};
 
 		return elements;
@@ -98,25 +105,30 @@ export default class Timer {
 		this.elements.btnStart.addEventListener("click", () => {
 			this.count();
 		});
+
+		this.elements.btnStop.addEventListener("click", () => {
+			if (Store.getState().timer.settings.isRunning) {
+				clearInterval(this.interval);
+				Store.dispatch("timer/stopCount");
+			}
+		});
 	}
 	private count() {
-		const { startTime, duration, isCountingUp } =
-			Store.getState().timer.settings;
+		const { startTime, duration } = Store.getState().timer.settings;
 
 		if (!startTime) {
-			console.log("test");
 			Store.dispatch("timer/setStartTime", Date.now());
 		}
 
 		Store.dispatch("timer/startCount");
 
-		const interval = setInterval(() => {
+		this.interval = setInterval(() => {
 			const currentTime: number = Date.now();
 			const elapsedTime: number =
 				currentTime - Store.getState().timer.settings.startTime;
 
 			if (elapsedTime >= duration) {
-				clearInterval(interval);
+				clearInterval(this.interval);
 				Store.dispatch("timer/resetClock");
 				Store.dispatch("timer/resetCount");
 			} else {

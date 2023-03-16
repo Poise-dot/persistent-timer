@@ -46,14 +46,6 @@ const timerSlice: Slice<State> = {
 				seconds = Math.floor((elapsedTime % (1000 * 60)) / 1000);
 			}
 
-			console.log(
-				elapsedTime,
-				state.settings.duration - elapsedTime,
-				"l",
-				minutes,
-				seconds
-			);
-
 			return {
 				...state,
 				clock: {
@@ -74,6 +66,21 @@ const timerSlice: Slice<State> = {
 		resetCount(state) {
 			return {
 				...state,
+				settings: {
+					...state.settings,
+					startTime: 0,
+					isRunning: false,
+				},
+			};
+		},
+		stopCount(state) {
+			return {
+				...state,
+				clock: {
+					...state.clock,
+					minutes: 0,
+					seconds: 0,
+				},
 				settings: {
 					...state.settings,
 					startTime: 0,
