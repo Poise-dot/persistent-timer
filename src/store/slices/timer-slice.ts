@@ -73,6 +73,21 @@ const timerSlice: Slice<State> = {
 				},
 			};
 		},
+		stopCount(state) {
+			return {
+				...state,
+				clock: {
+					...state.clock,
+					minutes: 0,
+					seconds: 0,
+				},
+				settings: {
+					...state.settings,
+					startTime: 0,
+					isRunning: false,
+				},
+			};
+		},
 		setClock(state, action) {
 			return {
 				...state,

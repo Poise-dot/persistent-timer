@@ -46,6 +46,7 @@ export default class Timer {
 				<option value="true">Up</option>
 			</select>
 			<button class="timer-start-btn" type="button">Start</button>
+			<button class="timer-stop-btn" type="button">STOP</button>
 		</div>
 		`;
 
@@ -77,6 +78,7 @@ export default class Timer {
 			input: timer.querySelector(".timer-input-duration") as Input,
 			select: timer.querySelector(".timer-select-isCountingUp") as Select,
 			btnStart: timer.querySelector(".timer-start-btn") as Button,
+			btnStop: timer.querySelector(".timer-stop-btn") as Button,
 		};
 
 		return elements;
@@ -102,6 +104,13 @@ export default class Timer {
 
 		this.elements.btnStart.addEventListener("click", () => {
 			this.count();
+		});
+
+		this.elements.btnStop.addEventListener("click", () => {
+			if (Store.getState().timer.settings.isRunning) {
+				clearInterval(this.interval);
+				Store.dispatch("timer/stopCount");
+			}
 		});
 	}
 	private count() {
