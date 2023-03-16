@@ -46,14 +46,6 @@ const timerSlice: Slice<State> = {
 				seconds = Math.floor((elapsedTime % (1000 * 60)) / 1000);
 			}
 
-			console.log(
-				elapsedTime,
-				state.settings.duration - elapsedTime,
-				"l",
-				minutes,
-				seconds
-			);
-
 			return {
 				...state,
 				clock: {
